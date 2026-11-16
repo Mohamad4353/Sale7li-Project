@@ -1,0 +1,1 @@
+<x-field label="Email" name="email" :required="true"><input></x-field>

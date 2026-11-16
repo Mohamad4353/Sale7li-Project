@@ -1,0 +1,250 @@
+@import "tailwindcss";
+
+/* ── SALE7LI design tokens ───────────────────────────────────────────────
+   One source of truth for the palette and type. Views reference the
+   generated utilities (bg-paper, text-muted, border-line …) instead of
+   hardcoding hex or slate-* shades. */
+@theme {
+    --font-sans: "DM Sans", "Noto Kufi Arabic", ui-sans-serif, system-ui, sans-serif;
+    --font-arabic: "Noto Kufi Arabic", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
+    --color-brand: #f4c430;   /* saffron accent */
+    --color-ink: #0d1115;     /* near-black, primary text + dark surfaces */
+    --color-paper: #f7f7f4;   /* app background */
+    --color-surface: #ffffff; /* cards, inputs */
+    --color-line: #e2e8f0;    /* hairline borders (slate-200) */
+    --color-muted: #64748b;   /* secondary text (slate-500) */
+    --color-faint: #5b6a7d;   /* captions/timestamps — WCAG AA (≈5:1 on paper); was #94a3b8 (~2.4:1) */
+
+    /* ── Phase 30 · Step 2 — extended semantic tokens ────────────────────
+       Additive only. Every token + value above is unchanged. Nothing
+       consumes the names below yet; views migrate onto them in Steps 3–8. */
+    --color-brand-ink: #1c1600;      /* text on saffron fills */
+    --color-ink-soft: #2b333c;       /* hover of ink surfaces / secondary dark text */
+    --color-bg: #f7f7f4;             /* alias of --color-paper (page background) */
+    --color-surface-2: #f2f2ee;      /* inset panels, table headers, wells */
+    --color-line-strong: #cbd5e1;    /* dividers with weight, input hover (slate-300) */
+
+    --color-text: #0d1115;           /* body text (= ink) */
+    --color-text-secondary: #475569; /* secondary body text (slate-600, ≈7:1 on paper) */
+
+    --color-success: #059669;
+    --color-success-soft: #ecfdf5;
+    --color-success-fg: #065f46;
+    --color-warning: #d97706;
+    --color-warning-soft: #fffbeb;
+    --color-warning-fg: #92400e;
+    --color-danger: #e11d48;
+    --color-danger-soft: #fff1f2;
+    --color-danger-fg: #9f1239;
+    --color-info: #0284c7;
+    --color-info-soft: #f0f9ff;
+    --color-info-fg: #075985;
+
+    --color-focus: #0d1115;          /* single canonical focus colour */
+
+    /* Radius — the project's de-facto scale already equals Tailwind v4's
+       defaults, so it is ADOPTED BY NAME, not remapped. Remapping the
+       built-in --radius-* keys would silently change every rounded-* in
+       the app, so only the genuinely-missing pill token is added:
+         xs  8px = rounded-lg     sm 12px = rounded-xl
+         md 16px = rounded-2xl    lg 24px = rounded-3xl */
+    --radius-pill: 9999px;
+
+    /* Elevation — new non-colliding namespace (Tailwind owns
+       --shadow-xs/sm/md/lg/xl/2xl). Utilities generated: shadow-card,
+       shadow-raised, shadow-pop, shadow-modal. Existing shadow-[…] values
+       are migrated onto these in later steps. */
+    --shadow-card: 0 1px 2px rgba(13, 17, 21, .05);
+    --shadow-raised: 0 4px 14px rgba(13, 17, 21, .06);
+    --shadow-pop: 0 12px 28px rgba(13, 17, 21, .10);
+    --shadow-modal: 0 24px 60px rgba(13, 17, 21, .16);
+
+    /* Container widths — canonical names for the two existing wrappers
+       defined below. Layout is unchanged in Step 2; documented here for
+       later adoption:  --container-wide ≈ 1280px (.container-x, marketing)
+       ·  --container-app ≈ 1120px (.container-app, authenticated shell). */
+}
+
+:root { color-scheme: light; }
+html { scroll-behavior: smooth; }
+body { @apply bg-paper text-ink antialiased; font-family: var(--font-sans); }
+[dir="rtl"] body { font-family: var(--font-arabic); }
+[x-cloak] { display:none!important; }
+
+/* No-JS fallback for the mobile filter drawer (components/filter-drawer.blade.php).
+   The slide-over is Alpine-driven; without JS its open button is inert, so the
+   panel would be a fixed element parked off-screen. When JS has not run we drop
+   it back into normal flow as a plain, always-visible block. lg+ is already a
+   static sidebar, so this only changes small screens. */
+html:not(.js) [data-filter-panel] {
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
+    translate: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+}
+html:not(.js) [data-filter-trigger],
+html:not(.js) [data-filter-dismiss] { display: none !important; }
+
+/* Visible keyboard focus everywhere without doubling up where a component
+   already defines its own ring. */
+:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; border-radius: 4px; }
+.btn-primary:focus-visible, .btn-accent:focus-visible, .btn-secondary:focus-visible,
+.btn-ghost:focus-visible, .input:focus-visible { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    html { scroll-behavior: auto; }
+}
+
+.skip-link { @apply sr-only; }
+.skip-link:focus { @apply not-sr-only fixed start-4 top-4 z-[100] rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white; }
+
+/* ── Typography scale ─────────────────────────────────────────────────── */
+.t-page { @apply text-2xl font-extrabold tracking-[-.03em] sm:text-3xl; }
+.t-section { @apply text-lg font-extrabold tracking-[-.02em]; }
+.t-card { @apply text-base font-extrabold; }
+.t-body { @apply text-sm leading-6 text-ink; }
+.t-muted { @apply text-sm leading-6 text-muted; }
+.t-small { @apply text-xs text-muted; }
+.t-label { @apply text-[13px] font-semibold text-ink; }
+.t-eyebrow { @apply text-[11px] font-extrabold uppercase tracking-[.16em] text-muted; }
+/* Phase 30 · Step 2 — additive scale tokens (no current consumer). */
+.t-display { @apply text-[2.75rem] font-extrabold leading-[1.03] tracking-[-.03em] sm:text-[3.5rem]; }
+.t-num { @apply text-[1.75rem] font-extrabold tabular-nums tracking-[-.03em] sm:text-[2rem]; }
+
+.container-x { @apply mx-auto w-full max-w-[1280px] px-5 sm:px-8 lg:px-10; }
+.container-app { @apply mx-auto w-full max-w-[1120px] px-4 sm:px-6 lg:px-8; }
+.brand-mark { @apply grid h-9 w-9 place-items-center rounded-xl bg-ink text-sm font-extrabold text-brand; }
+.brand-mark-dark { @apply bg-white text-ink; }
+.nav-link { @apply py-2 font-semibold text-muted transition hover:text-ink; }
+.icon-button { @apply grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-sm font-bold text-muted transition hover:border-line-strong hover:bg-surface-2 hover:text-ink; }
+.lang-switch { @apply grid h-11 min-w-11 place-items-center rounded-xl border border-line bg-surface px-3 text-xs font-extrabold text-ink transition hover:border-line-strong hover:bg-surface-2; }
+/* Legacy marketing-nav button classes — kept for the two <x-marketing-nav>
+   consumers, aligned to the <x-button> treatment (Phase 30 Step 9): shared
+   tokens, no hover lift, a visible focus ring on both. .btn-accent / .btn-ghost
+   / .btn-lg have no consumers left after Step 8 but are retained untouched. */
+.btn-primary { @apply inline-flex min-h-[2.75rem] items-center justify-center rounded-xl bg-ink px-5 py-3 text-sm font-bold text-white transition duration-200 hover:bg-ink-soft focus:outline-none focus-visible:ring-4 focus-visible:ring-ink/15; }
+.btn-accent { @apply inline-flex items-center justify-center rounded-xl bg-[#f4c430] px-5 py-3 text-sm font-extrabold text-slate-950 transition duration-200 hover:-translate-y-0.5 hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#f4c430]/25; }
+.btn-secondary { @apply inline-flex min-h-[2.75rem] items-center justify-center rounded-xl border border-line bg-surface px-4 py-2.5 text-sm font-bold text-ink transition hover:border-line-strong hover:bg-surface-2 focus:outline-none focus-visible:ring-4 focus-visible:ring-ink/15; }
+.btn-ghost { @apply inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10; }
+.btn-lg { @apply px-6 py-3.5; }
+.mobile-nav-link { @apply flex min-h-[44px] items-center rounded-xl px-4 py-3 transition hover:bg-surface-2; }
+.input { @apply mt-0 block w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink placeholder:text-faint transition hover:border-line-strong focus:border-ink focus:outline-none focus:ring-4 focus:ring-ink/15; }
+.input[aria-invalid="true"] { @apply border-rose-400 focus:border-rose-500 focus:ring-rose-500/20; }
+select.input { @apply pe-9; }
+textarea.input { @apply py-3; }
+/* ── Marketing / Home (Phase 30 Step 8 — decorative complexity reduced:
+   no radial glow, grid overlays, floating animation, blur, or rotation;
+   surfaces and type on the shared token system). ── */
+.hero-shell { @apply bg-ink text-white; }
+.eyebrow { @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-white/80; }
+.pulse-dot { @apply h-1.5 w-1.5 rounded-full bg-brand; }
+.hero-title { @apply mt-6 text-[2.5rem] font-extrabold leading-[1.05] tracking-[-.03em] sm:text-[3rem] lg:text-[3.5rem]; }
+.hero-title span { color: var(--color-brand); }
+.hero-copy { @apply mt-6 max-w-xl text-base leading-7 text-white/75 sm:text-lg; }
+.hero-device { @apply overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-2; }
+.device-top { @apply flex h-9 items-center gap-1.5 px-3; }
+.device-dot { @apply h-2 w-2 rounded-full bg-white/15; }
+.device-body { @apply rounded-xl bg-surface p-6 text-ink sm:p-7; }
+.mini-label { @apply text-[10px] font-extrabold uppercase tracking-[.14em] text-faint; }
+.verified-badge { @apply inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-extrabold text-emerald-700; }
+.service-rail { @apply grid overflow-hidden rounded-2xl border border-line bg-surface p-2 shadow-card sm:grid-cols-2 lg:grid-cols-4; }
+.service-quick { @apply flex min-h-[84px] items-center gap-3 rounded-xl px-4 py-3 transition hover:bg-surface-2; }
+.service-quick-icon { @apply grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-surface-2 text-xl; }
+.service-quick strong { @apply block text-sm font-extrabold; }
+.service-quick small { @apply mt-1 block text-[10px] font-semibold text-faint; }
+.section-head { @apply flex flex-col gap-5 md:flex-row md:items-end md:justify-between; }
+.section-head h2 { @apply mt-3 max-w-3xl text-[1.75rem] font-extrabold tracking-[-.02em] sm:text-4xl; }
+.section-head p { @apply max-w-md text-sm leading-7 text-muted; }
+.section-kicker { @apply text-[10px] font-extrabold uppercase tracking-[.18em] text-amber-600; }
+.process-card { @apply relative overflow-hidden rounded-2xl border border-line bg-surface p-7 shadow-card transition hover:border-line-strong hover:shadow-raised; }
+.process-card > span { @apply text-5xl font-extrabold tracking-[-.06em] text-line; }
+.process-card h3 { @apply mt-7 text-xl font-extrabold; }
+.process-card p { @apply mt-3 text-sm leading-7 text-muted; }
+.process-line { @apply mt-10 h-1 w-16 rounded-full bg-brand; }
+.category-card { @apply min-h-[260px] rounded-2xl border border-line bg-surface p-6 shadow-card transition hover:border-line-strong hover:shadow-raised; }
+.category-icon { @apply grid h-16 w-16 place-items-center rounded-xl bg-surface-2 text-2xl transition group-hover:bg-brand; }
+.category-card h3 { @apply text-lg font-extrabold; }
+.category-card p { @apply mt-3 line-clamp-3 text-sm leading-6 text-muted; }
+.category-arrow { @apply grid h-8 w-8 place-items-center rounded-full border border-line text-xs transition group-hover:border-ink group-hover:bg-ink group-hover:text-white; }
+.pro-card { @apply overflow-hidden rounded-2xl border border-line bg-surface transition hover:border-line-strong hover:shadow-raised; }
+.pro-photo { @apply relative grid h-48 place-items-center bg-surface-2; }
+.trust-panel { @apply grid overflow-hidden rounded-3xl bg-ink text-white lg:grid-cols-[1.1fr_.9fr]; }
+.trust-copy { @apply p-8 sm:p-12 lg:p-16; }
+.trust-copy h2 { @apply mt-4 max-w-xl text-[1.75rem] font-extrabold tracking-[-.02em] sm:text-4xl; }
+.trust-copy > p { @apply mt-5 max-w-xl text-sm leading-7 text-white/70; }
+.trust-visual { @apply relative min-h-[320px] overflow-hidden bg-[#151b20]; }
+.visual-ring { @apply absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand/25; }
+.visual-house { @apply absolute left-1/2 top-1/2 grid h-24 w-24 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-2xl bg-brand text-5xl font-extrabold text-ink; }
+.cta-panel { @apply flex flex-col items-start justify-between gap-8 rounded-3xl bg-brand p-8 sm:p-12 md:flex-row md:items-center; }
+.cta-panel h2 { @apply mt-3 text-[1.75rem] font-extrabold tracking-[-.02em] sm:text-4xl; }
+.cta-panel p { @apply mt-3 max-w-xl text-sm leading-7 text-ink/80; }
+.footer-heading { @apply text-[11px] font-extrabold uppercase tracking-[.14em] text-white/60; }
+.footer-link { @apply text-white/70 transition hover:text-white; }
+
+/* ── App shell (authenticated portals) ───────────────────────────────── */
+.app-nav-link { @apply inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-bold text-muted transition hover:bg-surface-2 hover:text-ink; }
+.app-nav-link[aria-current="page"] { @apply bg-ink text-white hover:bg-ink hover:text-white; }
+.app-drawer-link { @apply flex min-h-[44px] items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-ink transition hover:bg-surface-2; }
+.app-drawer-link[aria-current="page"] { @apply bg-ink text-white; }
+
+/* Directional glyphs (→ ✓ chevrons) that should mirror in RTL */
+[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
+
+/* ── Forms ──────────────────────────────────────────────────────────── */
+.field-label { @apply mb-1.5 flex items-center gap-1 text-[13px] font-semibold text-ink; }
+.field-req { @apply text-rose-500; }
+.field-error { @apply mt-1.5 flex items-start gap-1 text-xs font-semibold text-rose-600; }
+.field-hint { @apply mt-1.5 text-xs text-faint; }
+.input:disabled { @apply cursor-not-allowed bg-surface-2 text-faint; }
+.input:read-only { @apply bg-surface-2; }
+
+/* Native check controls pick up the brand ink instead of the UA default blue. */
+input[type="checkbox"], input[type="radio"] { accent-color: var(--color-ink); }
+
+/* Busy submit button (set by resources/js/app.js on form submit) */
+button[aria-busy="true"] { @apply pointer-events-none opacity-70; }
+button[aria-busy="true"]::after {
+    content: ""; @apply ms-2 inline-block h-3.5 w-3.5 rounded-full border-2 border-current border-e-transparent align-[-2px];
+    animation: sale7li-spin .6s linear infinite;
+}
+@keyframes sale7li-spin { to { transform: rotate(360deg); } }
+
+/* ── Top page-progress indicator (driven by resources/js/app.js) ─────── */
+#page-progress {
+    position: fixed; inset-inline: 0; inset-block-start: 0; height: 2px; z-index: 200;
+    background: var(--color-brand);
+    transform: scaleX(0); transform-origin: left center;
+    opacity: 0; pointer-events: none;
+    transition: transform .2s ease, opacity .3s ease;
+}
+[dir="rtl"] #page-progress { transform-origin: right center; }
+#page-progress.is-active { opacity: 1; }
+
+/* ── Tables that must not overflow on mobile ─────────────────────────── */
+.table-wrap { @apply -mx-4 overflow-x-auto sm:mx-0; }
+.table-wrap table { @apply w-full min-w-[560px] text-start text-sm sm:min-w-0; }
+
+/* Row-action link/button sized for a comfortable touch target (P14-23). */
+.table-action { @apply inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-2.5 text-sm font-bold transition; }
+
+/* ── Status dot (used beside status labels in lists) ─────────────────── */
+.status-dot { @apply inline-block h-1.5 w-1.5 rounded-full; }
+@media (max-width:767px){ .trust-visual{min-height:240px} }
+
+/* ── Print: strip the app chrome so invoices/receipts save as clean PDFs ── */
+@media print {
+    body { background: #fff !important; }
+    body > header,
+    body > footer,
+    .skip-link,
+    .no-print { display: none !important; }
+    main { margin: 0 !important; }
+    .print-sheet { box-shadow: none !important; border: 1px solid #d1d5db !important; }
+    a[href]::after { content: "" !important; } /* no URL spew after links */
+}

@@ -1,0 +1,105 @@
+<?php
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\WorkerController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Customer\DashboardController as CustomerDashboard;
+use App\Http\Controllers\Customer\BookingController;
+use App\Http\Controllers\Customer\AiSuggestionController;
+use App\Http\Controllers\Customer\RequestController as CustomerRequestController;
+use App\Http\Controllers\Customer\RescheduleRequestController;
+use App\Http\Controllers\Customer\ReviewController;
+use App\Http\Controllers\Customer\AddressController;
+use App\Http\Controllers\Customer\FavoriteController;
+use App\Http\Controllers\Customer\QuotationController;
+use App\Http\Controllers\Customer\PaymentController;
+use App\Http\Controllers\Customer\InvoiceController;
+use App\Http\Controllers\Customer\ComplaintController as CustomerComplaintController;
+use App\Http\Controllers\SupportController;
+use App\Http\Controllers\Worker\DashboardController as WorkerDashboard;
+use App\Http\Controllers\Worker\JobController;
+use App\Http\Controllers\Worker\RescheduleResponseController;
+use App\Http\Controllers\Worker\PortfolioController;
+use App\Http\Controllers\Worker\ProfileController;
+use App\Http\Controllers\Worker\ServiceCatalogController;
+use App\Http\Controllers\Worker\AvailabilityController;
+use App\Http\Controllers\Worker\EarningsController;
+use App\Http\Controllers\Worker\ComplaintController as WorkerComplaintController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WorkerVerificationController;
+use App\Http\Controllers\Admin\RequestController as AdminRequestController;
+use App\Http\Controllers\Admin\ServiceCategoryController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\RefundController;
+use App\Http\Controllers\Admin\CommissionSettingController;
+use App\Http\Controllers\Admin\ComplaintController as AdminComplaintController;
+
+Route::get('/', [HomeController::class,'index'])->name('home');
+Route::post('/lang', LanguageController::class)->middleware('throttle:mutations')->name('lang');
+Route::get('/services', [ServiceController::class,'index'])->name('services.index');
+Route::get('/services/{service}', [ServiceController::class,'show'])->name('services.show');
+Route::get('/professionals', [WorkerController::class,'index'])->name('workers.index');
+Route::get('/explore', [\App\Http\Controllers\MarketplaceExploreController::class,'index'])->name('marketplace.explore');
+Route::get('/api/marketplace/workers', [\App\Http\Controllers\Api\MarketplaceController::class,'workers'])
+    ->middleware('throttle:marketplace')->name('api.marketplace.workers');
+Route::get('/professionals/{worker}', [WorkerController::class,'show'])->name('workers.show');
+Route::get('/professionals/{worker}/photo', [WorkerController::class,'photo'])->name('workers.photo');
+Route::get('/professionals/{worker}/portfolio/{portfolioItem}/image', [WorkerController::class,'portfolioImage'])->whereNumber('portfolioItem')->name('workers.portfolio.image');
+Route::middleware('guest')->group(function(){
+ Route::get('/login',[LoginController::class,'create'])->name('login');Route::post('/login',[LoginController::class,'store'])->middleware('throttle:login')->name('login.store');
+ Route::get('/register',[RegisterController::class,'create'])->name('register');Route::post('/register',[RegisterController::class,'store'])->middleware('throttle:register')->name('register.store');
+ Route::get('/forgot-password',[PasswordResetLinkController::class,'create'])->name('password.request');
+ Route::post('/forgot-password',[PasswordResetLinkController::class,'store'])->middleware('throttle:password')->name('password.email');
+ Route::get('/reset-password/{token}',[NewPasswordController::class,'create'])->name('password.reset');
+ Route::post('/reset-password',[NewPasswordController::class,'store'])->middleware('throttle:password')->name('password.update');
+});
+Route::get('/account/suspended',[LoginController::class,'suspended'])->name('account.suspended');
+Route::post('/logout',[LoginController::class,'destroy'])->middleware('auth')->name('logout');
+
+// Email verification (Phase 23). Authenticated but not gated behind `verified`.
+Route::middleware('auth')->group(function(){
+ Route::get('/email/verify',[\App\Http\Controllers\Auth\EmailVerificationController::class,'notice'])->name('verification.notice');
+ Route::get('/email/verify/{id}/{hash}',[\App\Http\Controllers\Auth\EmailVerificationController::class,'verify'])->middleware(['signed','throttle:6,1'])->name('verification.verify');
+ Route::post('/email/verification-notification',[\App\Http\Controllers\Auth\EmailVerificationController::class,'send'])->middleware('throttle:6,1')->name('verification.send');
+});
+Route::middleware(['auth','active'])->group(function(){
+ Route::get('/dashboard',[HomeController::class,'dashboard'])->name('dashboard');
+ Route::get('/support',[SupportController::class,'show'])->name('support');
+ Route::get('/notifications',[NotificationController::class,'index'])->name('notifications.index');Route::get('/notifications/{notification}',[NotificationController::class,'open'])->whereNumber('notification')->name('notifications.open');Route::post('/notifications/{notification}/read',[NotificationController::class,'read'])->middleware('throttle:mutations')->name('notifications.read');Route::post('/notifications/read-all',[NotificationController::class,'readAll'])->middleware('throttle:mutations')->name('notifications.readAll');
+ Route::get('/messages',[ConversationController::class,'index'])->name('messages.index');
+ Route::get('/requests/{serviceRequest}/messages',[ConversationController::class,'show'])->name('messages.show');
+ Route::get('/requests/{serviceRequest}/messages/poll',[ConversationController::class,'poll'])->name('messages.poll');
+ Route::get('/requests/{serviceRequest}/attachments/{collection}/{index}',[AttachmentController::class,'requestImage'])->whereNumber('index')->name('attachments.request');
+ Route::get('/messages/{message}/attachments/{index}',[AttachmentController::class,'messageAttachment'])->whereNumber('index')->name('attachments.message');
+ Route::get('/payments/{payment}/proof',[AttachmentController::class,'paymentProof'])->whereNumber('payment')->name('attachments.paymentProof');
+ Route::prefix('customer')->name('customer.')->middleware('role:customer')->group(function(){
+  Route::get('/dashboard',CustomerDashboard::class)->name('dashboard');
+  Route::get('/book', [BookingController::class,'create'])->middleware('verified')->name('booking.create');Route::post('/book',[BookingController::class,'store'])->middleware(['throttle:booking','verified'])->name('booking.store');
+  Route::post('/book/draft',[BookingController::class,'draft'])->middleware('verified')->name('booking.draft');Route::get('/book/availability',[BookingController::class,'availability'])->middleware(['verified','throttle:60,1'])->name('booking.availability');Route::post('/book/ai-suggestion',[AiSuggestionController::class,'store'])->middleware(['verified','throttle:ai-assistant'])->name('booking.aiSuggestion');
+  Route::get('/requests/{serviceRequest}/rebook',[BookingController::class,'rebook'])->name('requests.rebook');
+  Route::get('/requests',[CustomerRequestController::class,'index'])->name('requests.index');Route::get('/requests/{serviceRequest}',[CustomerRequestController::class,'show'])->name('requests.show');Route::get('/requests/{serviceRequest}/messages',[ConversationController::class,'show'])->name('messages.show');Route::post('/requests/{serviceRequest}/cancel',[CustomerRequestController::class,'cancel'])->middleware('throttle:mutations')->name('requests.cancel');Route::post('/requests/{serviceRequest}/reschedule',[RescheduleRequestController::class,'store'])->middleware(['throttle:mutations','verified'])->name('requests.reschedule');
+  Route::post('/requests/{serviceRequest}/review',[ReviewController::class,'store'])->middleware(['throttle:mutations','verified'])->name('reviews.store');
+  Route::post('/requests/{serviceRequest}/report',[CustomerComplaintController::class,'store'])->middleware(['throttle:mutations','verified'])->name('complaints.store');
+  Route::get('/complaints',[CustomerComplaintController::class,'index'])->name('complaints.index');Route::get('/complaints/{complaint}',[CustomerComplaintController::class,'show'])->whereNumber('complaint')->name('complaints.show');
+  Route::get('/favorites',[FavoriteController::class,'index'])->name('favorites.index');Route::post('/favorites/{worker}',[FavoriteController::class,'toggle'])->middleware('throttle:mutations')->whereNumber('worker')->name('favorites.toggle');
+  Route::get('/addresses',[AddressController::class,'index'])->name('addresses.index');Route::post('/addresses',[AddressController::class,'store'])->middleware('throttle:mutations')->name('addresses.store');Route::get('/addresses/{address}/edit',[AddressController::class,'edit'])->name('addresses.edit');Route::put('/addresses/{address}',[AddressController::class,'update'])->middleware('throttle:mutations')->name('addresses.update');Route::post('/addresses/{address}/default',[AddressController::class,'makeDefault'])->middleware('throttle:mutations')->name('addresses.default');Route::delete('/addresses/{address}',[AddressController::class,'destroy'])->middleware('throttle:mutations')->name('addresses.destroy');
+  Route::post('/quotations/{quotation}/accept',[QuotationController::class,'accept'])->middleware(['throttle:mutations','verified'])->name('quotations.accept');Route::post('/quotations/{quotation}/reject',[QuotationController::class,'reject'])->middleware('throttle:mutations')->name('quotations.reject');
+  Route::post('/requests/{serviceRequest}/pay',[PaymentController::class,'pay'])->middleware(['throttle:payments','verified'])->name('payments.pay');
+  Route::get('/requests/{serviceRequest}/whish',[PaymentController::class,'whish'])->middleware('verified')->name('payments.whish');
+  Route::post('/requests/{serviceRequest}/whish',[PaymentController::class,'submitWhish'])->middleware(['throttle:payments','verified'])->name('payments.whish.submit');
+  Route::get('/requests/{serviceRequest}/receipt',[PaymentController::class,'receipt'])->name('requests.receipt');
+  Route::get('/requests/{serviceRequest}/invoice',[InvoiceController::class,'show'])->name('requests.invoice');
+  Route::post('/requests/{serviceRequest}/messages',[ConversationController::class,'store'])->middleware('throttle:messaging')->name('messages.store');
+ });
+ Route::prefix('worker')->name('worker.')->middleware('role:worker')->group(function(){Route::get('/dashboard',WorkerDashboard::class)->name('dashboard');Route::get('/jobs',[JobController::class,'index'])->name('jobs.index');Route::get('/jobs/{serviceRequest}',[JobController::class,'show'])->name('jobs.show');Route::get('/jobs/{serviceRequest}/messages',[ConversationController::class,'show'])->name('messages.show');Route::post('/jobs/{serviceRequest}/accept',[JobController::class,'accept'])->middleware('throttle:mutations')->name('jobs.accept');Route::post('/jobs/{serviceRequest}/decline',[JobController::class,'decline'])->middleware('throttle:mutations')->name('jobs.decline');Route::post('/jobs/{serviceRequest}/status',[JobController::class,'status'])->middleware('throttle:mutations')->name('jobs.status');Route::post('/jobs/{serviceRequest}/quotation',[JobController::class,'quotation'])->middleware('throttle:mutations')->name('jobs.quotation');Route::post('/reschedule/{rescheduleRequest}/accept',[RescheduleResponseController::class,'accept'])->middleware('throttle:mutations')->whereNumber('rescheduleRequest')->name('reschedule.accept');Route::post('/reschedule/{rescheduleRequest}/decline',[RescheduleResponseController::class,'decline'])->middleware('throttle:mutations')->whereNumber('rescheduleRequest')->name('reschedule.decline');Route::post('/jobs/{serviceRequest}/messages',[ConversationController::class,'store'])->middleware('throttle:messaging')->name('messages.store');Route::get('/services',[ServiceCatalogController::class,'edit'])->name('services.edit');Route::put('/services',[ServiceCatalogController::class,'update'])->middleware('throttle:mutations')->name('services.update');Route::get('/availability',[AvailabilityController::class,'edit'])->name('availability.edit');Route::put('/availability',[AvailabilityController::class,'update'])->middleware('throttle:mutations')->name('availability.update');Route::get('/portfolio',[PortfolioController::class,'index'])->name('portfolio.index');Route::post('/portfolio',[PortfolioController::class,'store'])->middleware('throttle:mutations')->name('portfolio.store');Route::get('/portfolio/{portfolioItem}/image',[PortfolioController::class,'image'])->whereNumber('portfolioItem')->name('portfolio.image');Route::put('/portfolio/{portfolioItem}',[PortfolioController::class,'update'])->middleware('throttle:mutations')->whereNumber('portfolioItem')->name('portfolio.update');Route::delete('/portfolio/{portfolioItem}',[PortfolioController::class,'destroy'])->middleware('throttle:mutations')->whereNumber('portfolioItem')->name('portfolio.destroy');Route::get('/earnings',[EarningsController::class,'index'])->name('earnings');Route::get('/complaints',[WorkerComplaintController::class,'index'])->name('complaints.index');Route::get('/complaints/{complaint}',[WorkerComplaintController::class,'show'])->whereNumber('complaint')->name('complaints.show');Route::get('/profile',[ProfileController::class,'edit'])->name('profile.edit');Route::put('/profile',[ProfileController::class,'update'])->middleware('throttle:mutations')->name('profile.update');});
+ Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function(){Route::get('/dashboard',AdminDashboard::class)->name('dashboard');Route::get('/users',[UserController::class,'index'])->name('users.index');Route::post('/users/{user}/toggle',[UserController::class,'toggle'])->middleware('throttle:mutations')->name('users.toggle');Route::post('/users/{user}/password-reset-link',[UserController::class,'sendPasswordResetLink'])->middleware('throttle:mutations')->name('users.passwordResetLink');Route::post('/workers/{workerProfile}/verification',[WorkerVerificationController::class,'update'])->middleware('throttle:mutations')->name('workers.verification');Route::get('/requests',[AdminRequestController::class,'index'])->name('requests.index');Route::get('/requests/export',[AdminRequestController::class,'export'])->name('requests.export');Route::get('/requests/{serviceRequest}',[AdminRequestController::class,'show'])->name('requests.show');Route::post('/requests/{serviceRequest}/assign',[AdminRequestController::class,'assign'])->middleware('throttle:mutations')->name('requests.assign');Route::get('/services',[ServiceCategoryController::class,'index'])->name('services.index');Route::post('/services',[ServiceCategoryController::class,'store'])->middleware('throttle:mutations')->name('services.store');Route::get('/services/{serviceCategory}/edit',[ServiceCategoryController::class,'edit'])->name('services.edit');Route::put('/services/{serviceCategory}',[ServiceCategoryController::class,'update'])->middleware('throttle:mutations')->name('services.update');Route::post('/services/{serviceCategory}/toggle',[ServiceCategoryController::class,'toggle'])->middleware('throttle:mutations')->name('services.toggle');Route::get('/payments',[AdminPaymentController::class,'index'])->name('payments.index');Route::get('/payments/export',[AdminPaymentController::class,'export'])->name('payments.export');Route::get('/payments/reconciliation',[AdminPaymentController::class,'reconciliation'])->name('payments.reconciliation');Route::get('/payments/reconciliation/export',[AdminPaymentController::class,'reconciliationExport'])->name('payments.reconciliation.export');Route::get('/payments/whish',[AdminPaymentController::class,'pendingWhish'])->name('payments.whish');Route::post('/payments/{payment}/whish/approve',[AdminPaymentController::class,'approveWhish'])->middleware('throttle:mutations')->whereNumber('payment')->name('payments.whish.approve');Route::post('/payments/{payment}/whish/reject',[AdminPaymentController::class,'rejectWhish'])->middleware('throttle:mutations')->whereNumber('payment')->name('payments.whish.reject');Route::post('/payments/{payment}/refund',[RefundController::class,'store'])->middleware('throttle:mutations')->name('payments.refund');Route::get('/settings/commission',[CommissionSettingController::class,'edit'])->name('settings.commission.edit');Route::put('/settings/commission',[CommissionSettingController::class,'update'])->middleware('throttle:mutations')->name('settings.commission.update');Route::get('/complaints',[AdminComplaintController::class,'index'])->name('complaints.index');Route::get('/complaints/{complaint}',[AdminComplaintController::class,'show'])->name('complaints.show');Route::patch('/complaints/{complaint}',[AdminComplaintController::class,'update'])->middleware('throttle:mutations')->name('complaints.update');});
+});

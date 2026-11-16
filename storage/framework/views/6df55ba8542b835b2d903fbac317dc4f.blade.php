@@ -1,0 +1,1 @@
+<x-chart-bars :series="$series" title="t" />

@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Saved addresses',
+    'sub' => 'Addresses you can pick from when booking a service.',
+    'default' => 'Default',
+    'none_title' => 'No saved addresses',
+    'none_hint' => 'Add an address so you can select it when you book.',
+    'add' => 'Add an address',
+    'edit_title' => 'Edit address',
+    'edit' => 'Edit',
+    'label' => 'Label',
+    'label_placeholder' => 'Home, Office…',
+    'street' => 'Street',
+    'city' => 'City',
+    'area' => 'Area',
+    'postal_code' => 'Postal code',
+    'instructions' => 'Access instructions',
+    'instructions_placeholder' => 'Gate code, floor, landmarks…',
+    'make_default' => 'Use as my default address',
+    'set_default' => 'Set as default',
+    'save' => 'Save address',
+    'remove' => 'Remove',
+    'remove_confirm' => 'Remove this address?',
+];

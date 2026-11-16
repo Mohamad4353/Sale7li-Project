@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'primary' => 'الرئيسية',
+    'home' => 'الرئيسية',
+    'services' => 'الخدمات',
+    'professionals' => 'مقدّمو الخدمة',
+    'dashboard' => 'لوحة التحكم',
+    'requests' => 'الطلبات',
+    'jobs' => 'المهام',
+    'availability' => 'التوفر',
+    'portfolio' => 'معرض الأعمال',
+    'earnings' => 'الأرباح',
+    'payments' => 'المدفوعات',
+    'addresses' => 'العناوين',
+    'favorites' => 'المحفوظون',
+    'profile' => 'الملف الشخصي',
+    'users' => 'العملاء ومقدّمو الخدمة',
+    'notifications' => 'الإشعارات',
+    'messages' => 'الرسائل',
+    'complaints' => 'الشكاوى',
+    'support' => 'الدعم',
+    'login' => 'تسجيل الدخول',
+    'register' => 'إنشاء حساب',
+    'logout' => 'تسجيل الخروج',
+    'menu' => 'القائمة',
+    'switch_language' => 'تغيير اللغة',
+];

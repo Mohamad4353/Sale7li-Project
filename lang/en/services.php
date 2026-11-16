@@ -1,0 +1,48 @@
+<?php
+
+return [
+    'eyebrow' => 'Marketplace',
+    'index_title' => 'Find the right service',
+    'index_sub' => 'Browse home-service categories and the professionals available for each.',
+    'search_placeholder' => 'Search plumbing, electrical, AC…',
+    'search' => 'Search',
+    'none_title' => 'No services match your search',
+    'none_hint' => 'Try a different term, or clear the filters to see every category.',
+    'from' => 'From',
+    'starting_from' => 'Starting from',
+    'all_services' => 'All services',
+    'book_this' => 'Book this service',
+    'request_this' => 'Request this service',
+    'sign_in' => 'Sign in',
+    'view_service' => 'View service',
+    'available_professionals' => 'Available professionals',
+    'browse_all_professionals' => 'Browse all professionals',
+    'none_professionals' => 'No verified professionals offer this service yet.',
+    'years_experience' => 'years experience',
+    'rating_new' => 'New',
+    'about_service' => 'About this service',
+
+    // Discovery filters
+    'filters' => 'Filters',
+    'clear_filters' => 'Clear filters',
+    'category' => 'Category',
+    'all_categories' => 'All categories',
+    'price' => 'Price',
+    'min_price' => 'Min',
+    'max_price' => 'Max',
+    'apply' => 'Apply',
+    'sort_label' => 'Sort by',
+    'results_count' => '{0}No results|{1}1 result|[2,*]:count results',
+    'pro_count' => '{0}No professionals yet|{1}1 professional|[2,*]:count professionals',
+    'active_search' => 'Search: :term',
+    'active_category' => 'Category: :name',
+    'active_price' => 'Price: :range',
+
+    'sort' => [
+        'recommended' => 'Recommended',
+        'price_low' => 'Price: low to high',
+        'price_high' => 'Price: high to low',
+        'newest' => 'Newest',
+        'name' => 'Name (A–Z)',
+    ],
+];

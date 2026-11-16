@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'primary' => 'Primary',
+    'home' => 'Home',
+    'services' => 'Services',
+    'professionals' => 'Professionals',
+    'dashboard' => 'Dashboard',
+    'requests' => 'Requests',
+    'jobs' => 'Jobs',
+    'availability' => 'Availability',
+    'portfolio' => 'Portfolio',
+    'earnings' => 'Earnings',
+    'payments' => 'Payments',
+    'addresses' => 'Addresses',
+    'favorites' => 'Saved',
+    'profile' => 'Profile',
+    'users' => 'Customers & workers',
+    'notifications' => 'Notifications',
+    'messages' => 'Messages',
+    'complaints' => 'Complaints',
+    'support' => 'Support',
+    'login' => 'Log in',
+    'register' => 'Create account',
+    'logout' => 'Log out',
+    'menu' => 'Menu',
+    'switch_language' => 'Switch language',
+];

@@ -1,0 +1,1 @@
+<x-badge tone="warning">x</x-badge>

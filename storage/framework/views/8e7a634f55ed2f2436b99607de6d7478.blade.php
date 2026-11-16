@@ -1,0 +1,1 @@
+<x-icon name="shield" aria-label="Verified professional" />

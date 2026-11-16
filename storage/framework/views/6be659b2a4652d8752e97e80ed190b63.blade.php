@@ -1,0 +1,1 @@
+<x-button href="/go">Continue</x-button>

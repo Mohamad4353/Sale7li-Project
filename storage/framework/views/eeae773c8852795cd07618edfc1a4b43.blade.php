@@ -1,0 +1,1 @@
+<x-worker-card :worker="$worker" />

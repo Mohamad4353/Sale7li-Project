@@ -1,0 +1,1 @@
+<x-chart-line :series="$series" title="Requests" />

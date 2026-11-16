@@ -1,0 +1,1 @@
+<x-badge tone="info">x</x-badge>
